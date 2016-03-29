@@ -42,6 +42,8 @@ else
     meteorhacks/meteord:base
 fi
 
+docker exec -i $APPNAME apt-get install graphicsmagick -y
+
 <% if(typeof sslConfig === "object")  { %>
   # We don't need to fail the deployment because of a docker hub downtime
   set +e
