@@ -7,15 +7,17 @@ ENV_FILE=$APP_PATH/config/env.list
 PORT=<%= port %>
 USE_LOCAL_MONGO=<%= useLocalMongo? "1" : "0" %>
 
+docker build -t meteorhacks/meteord:app - << EOF
+FROM meteorhacks/meteord:base
+RUN apt-get install graphicsmagick -y
+EOF
+
 # Remove previous version of the app, if exists
 docker rm -f $APPNAME
 
 # Remove frontend container if exists
 docker rm -f $APPNAME-frontend
 
-# We don't need to fail the deployment because of a docker hub downtime
-set +e
-docker pull meteorhacks/meteord:base
 set -e
 
 if [ "$USE_LOCAL_MONGO" == "1" ]; then
@@ -25,11 +27,12 @@ if [ "$USE_LOCAL_MONGO" == "1" ]; then
     --publish=$PORT:80 \
     --volume=$BUNDLE_PATH:/bundle \
     --env-file=$ENV_FILE \
+    --env-file=$APP_PATH/config/settings.env \
     --link=mongodb:mongodb \
     --hostname="$HOSTNAME-$APPNAME" \
     --env=MONGO_URL=mongodb://mongodb:27017/$APPNAME \
     --name=$APPNAME \
-    meteorhacks/meteord:base
+    meteorhacks/meteord:app
 else
   docker run \
     -d \
@@ -38,11 +41,11 @@ else
     --volume=$BUNDLE_PATH:/bundle \
     --hostname="$HOSTNAME-$APPNAME" \
     --env-file=$ENV_FILE \
+    --env-file=$APP_PATH/config/settings.env \
+    --link=mongodb:mongodb \
     --name=$APPNAME \
-    meteorhacks/meteord:base
+    meteorhacks/meteord:app
 fi
-
-docker exec -i $APPNAME apt-get install graphicsmagick -y
 
 <% if(typeof sslConfig === "object")  { %>
   # We don't need to fail the deployment because of a docker hub downtime
