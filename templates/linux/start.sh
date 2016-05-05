@@ -10,6 +10,7 @@ USE_LOCAL_MONGO=<%= useLocalMongo? "1" : "0" %>
 docker build -t meteorhacks/meteord:app - << EOF
 FROM meteorhacks/meteord:base
 RUN apt-get install graphicsmagick -y
+RUN cd $APP_PATH/current/bundle/programs/server/node_modules/ ; rm -rf fibers && npm install fibers
 EOF
 
 # Remove previous version of the app, if exists
