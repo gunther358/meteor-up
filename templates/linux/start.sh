@@ -6,10 +6,13 @@ BUNDLE_PATH=$APP_PATH/current
 ENV_FILE=$APP_PATH/config/env.list
 PORT=<%= port %>
 USE_LOCAL_MONGO=<%= useLocalMongo? "1" : "0" %>
+TIMEZONE='Europe/Warsaw' #TODO: timezone as js config parameter
 
 docker build -t meteorhacks/meteord:app - << EOF
 FROM meteorhacks/meteord:base
 RUN apt-get install graphicsmagick -y
+RUN echo $TIMEZONE > /etc/timezone
+RUN apt-get update && apt-get install --reinstall tzdata
 RUN cd $APP_PATH/current/bundle/programs/server/node_modules/ ; rm -rf fibers && npm install fibers
 EOF
 
